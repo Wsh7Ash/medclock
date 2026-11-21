@@ -1,0 +1,11 @@
+morning: exit code 0 (expected 0)
+pinch: exit code 1 (expected 1)
+pinch-without-gate: exit code 0 (expected 0)
+morning feasible: True
+morning schedule rows: 7 (expected 7)
+pinch cycle weight: 120 (expected 120)
+pinch core groups: 3 (expected 3)
+pinch single relaxations: 3 (expected 3)
+ascii only: True
+exit codes as expected: True
+expectations met: True

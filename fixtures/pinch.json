@@ -1,0 +1,50 @@
+{
+  "name": "post-discharge",
+  "wake": "07:00",
+  "sleep": "22:00",
+  "events": {
+    "breakfast": "08:00",
+    "lunch": "13:00",
+    "dinner": "19:00"
+  },
+  "medications": [
+    {
+      "name": "levothyroxine",
+      "window": { "start": "07:00", "end": "07:30" },
+      "food": [
+        {
+          "event": "breakfast",
+          "relation": "before",
+          "minutes": "30m",
+          "reason": "empty stomach"
+        }
+      ]
+    },
+    {
+      "name": "calcium",
+      "window": { "start": "08:00", "end": "09:00" }
+    },
+    {
+      "name": "iron",
+      "window": { "start": "11:00", "end": "12:00" }
+    },
+    {
+      "name": "metformin",
+      "window": { "start": "08:00", "end": "09:30" }
+    }
+  ],
+  "gaps": [
+    {
+      "before": "levothyroxine",
+      "after": "calcium",
+      "minutes": "4h",
+      "reason": "calcium binds levothyroxine"
+    },
+    {
+      "before": "levothyroxine",
+      "after": "iron",
+      "minutes": "4h",
+      "reason": "iron binds levothyroxine"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+medclock demo - captured CLI output
+
+$ medclock check fixtures/morning.json
+medclock - medication timing feasibility, with a proof when there is none
+problem: morning.json (5 medication(s), 7 dose(s), 13 constraint group(s))
+day 06:30-22:30; events: breakfast 07:30, lunch 12:30, dinner 18:30
+
+SCHEDULE (earliest feasible, preferences aligned)
+time  dose             window       slack  preference
+06:30  levothyroxine#1  06:30-07:00    30m  -
+07:30  metformin#1      07:30-09:00  1h30m  -
+07:45  aspirin#1        07:30-08:30    45m  -
+10:30  iron#1           10:00-11:00    30m  10:15
+12:30  calcium#1        12:30-13:30     1h  -
+19:30  metformin#2      18:30-20:00    30m  19:30
+20:00  calcium#2        20:00-21:00     1h  -
+
+constraint groups: 13/13 checked directly against the problem - all groups satisfied
+
+SUMMARY 7 dose(s) scheduled, 1 preference(s) met, 0 warning(s)
+GATE     feasible -> PASS
+exit code: 0
+
+$ medclock check fixtures/pinch.json
+medclock - medication timing feasibility, with a proof when there is none
+problem: pinch.json (4 medication(s), 4 dose(s), 7 constraint group(s))
+day 07:00-22:00; events: breakfast 08:00, lunch 13:00, dinner 19:00
+
+SOLVER   infeasible - no assignment of the 4 dose(s) satisfies all 7 group(s)
+
+INFEASIBILITY PROOF (positive cycle, total +2h)
+  t(levothyroxine#1) >= t(clock) +7h      levothyroxine#1 is at or after 07:00 (window)
+  t(calcium#1) >= t(levothyroxine#1) +4h  calcium#1 is at least 4h after levothyroxine#1 (calcium binds levothyroxine)
+  t(clock) >= t(calcium#1) -9h            calcium#1 is at or before 09:00 (window)
+  => t(clock) >= t(clock) + 2h, which has no solution
+
+MINIMAL UNSATISFIABLE CORE (3 of 7 groups; dropping any one restores feasibility)
+  window:levothyroxine#1      levothyroxine#1 within 07:00-07:30
+  window:calcium#1            calcium#1 within 08:00-09:00
+  gap:levothyroxine->calcium  calcium at least 4h after levothyroxine (calcium binds levothyroxine)
+  (4 other group(s) do not contribute to this conflict)
+
+RELAXATIONS (one change, fewest minutes first)
+  2h  shorten levothyroxine->calcium: 4h -> 2h
+  2h  close the calcium#1 window later: 09:00 -> 11:00
+  2h  open the levothyroxine#1 window earlier: 07:00 -> 05:00
+  cheapest single relaxation: 2h
+  no single change in 4 other group(s) removes the conflict within 24h
+
+SUMMARY infeasible; core of 3 group(s); cheapest single relaxation: 2h
+GATE     infeasible -> FAIL
+exit code: 1
+
+$ medclock check fixtures/pinch.json --fail-on none
+medclock - medication timing feasibility, with a proof when there is none
+problem: pinch.json (4 medication(s), 4 dose(s), 7 constraint group(s))
+day 07:00-22:00; events: breakfast 08:00, lunch 13:00, dinner 19:00
+
+SOLVER   infeasible - no assignment of the 4 dose(s) satisfies all 7 group(s)
+
+INFEASIBILITY PROOF (positive cycle, total +2h)
+  t(levothyroxine#1) >= t(clock) +7h      levothyroxine#1 is at or after 07:00 (window)
+  t(calcium#1) >= t(levothyroxine#1) +4h  calcium#1 is at least 4h after levothyroxine#1 (calcium binds levothyroxine)
+  t(clock) >= t(calcium#1) -9h            calcium#1 is at or before 09:00 (window)
+  => t(clock) >= t(clock) + 2h, which has no solution
+
+MINIMAL UNSATISFIABLE CORE (3 of 7 groups; dropping any one restores feasibility)
+  window:levothyroxine#1      levothyroxine#1 within 07:00-07:30
+  window:calcium#1            calcium#1 within 08:00-09:00
+  gap:levothyroxine->calcium  calcium at least 4h after levothyroxine (calcium binds levothyroxine)
+  (4 other group(s) do not contribute to this conflict)
+
+RELAXATIONS (one change, fewest minutes first)
+  2h  shorten levothyroxine->calcium: 4h -> 2h
+  2h  close the calcium#1 window later: 09:00 -> 11:00
+  2h  open the levothyroxine#1 window earlier: 07:00 -> 05:00
+  cheapest single relaxation: 2h
+  no single change in 4 other group(s) removes the conflict within 24h
+
+SUMMARY infeasible; core of 3 group(s); cheapest single relaxation: 2h
+GATE     infeasible -> PASS
+exit code: 0
+
+json feasible: {"doses": 7, "feasible": true, "groups": 13, "preferences_met": 1}
+json infeasible: {"core_groups": 3, "cycle_minutes": 120, "dropped_groups": 4, "relaxations": [120, 120, 120]}
